@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>AutoSRT - Tradutor de Legendas</title>
+  <link rel="icon" href="{{ url_for('static', filename='icon.ico') }}" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #2c2c2c;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+    }
+
+
+
+    input[type="file"] {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 28px;
+      background-color: #333;
+      color: #fff;
+      border: 2px solid #444;
+      border-radius: 9px;
+      font-size: medium;
+    }
+
+    button {
+      padding: 16px 48px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color:#0b5ed7;
+    }
+
+    .progress-bar {
+      margin-top: 25px;
+      width: 100%;
+      height: 8px;
+      background: #444;
+      border-radius: 6px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #00b894;
+      transition: width 0.3s ease;
+    }
+ .logo {
+      width: 350px;
+      margin-bottom: 25px;
+    
+    }
+    .message {
+      margin-top: 20px;
+      color: #66ff99;
+      font-weight: bold;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="{{ url_for('static', filename='by_Anitec_Copia.png') }}" alt="AutoSRT Logo" class="logo">
+    <form method="POST" action="/tradutor" enctype="multipart/form-data" onsubmit="startProgress()">
+      <input type="file" name="srt_file" required>
+      <button type="submit">Traduzir</button>
+    </form>
+
+    <div class="progress-bar" id="progressBar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="message" id="statusMessage" style="display:none;"></div>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="message">
+          {% for message in messages %}
+            {{ message }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <script>
+    let progressInterval;
+
+    function startProgress() {
+      const bar = document.getElementById('progressBar');
+      const fill = document.getElementById('progressFill');
+      const msg = document.getElementById('statusMessage');
+
+      bar.style.display = 'block';
+      fill.style.width = '0%';
+      msg.style.display = 'none';
+
+      let progress = 0;
+      progressInterval = setInterval(() => {
+        if (progress < 95) {
+          progress += Math.random() * 3;
+          fill.style.width = progress + "%";
+        }
+      }, 200);
+    }
+
+    window.onload = function () {
+      const form = document.querySelector("form");
+      const msg = document.getElementById("statusMessage");
+
+      form.addEventListener("submit", function () {
+        startProgress();
+
+        setTimeout(() => {
+          clearInterval(progressInterval);
+          document.getElementById("progressFill").style.width = "100%";
+
+          setTimeout(() => {
+            document.getElementById("progressBar").style.display = "none";
+            document.getElementById("progressFill").style.width = "0%";
+            form.reset();
+
+            msg.innerText = "✅ Tradução concluída com sucesso!";
+            msg.style.display = "block";
+
+            setTimeout(() => {
+              msg.style.display = "none";
+            }, 8000);
+          }, 1500);
+        }, 6000);
+      });
+    };
+  </script>
+</body>
+</html>

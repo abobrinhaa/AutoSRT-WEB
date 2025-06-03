@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Bem-vindo ao AutoSRT</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: #16191b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .logo {
+      width: 320px;
+      margin-bottom: 25px;
+    
+    }
+
+    h2 {
+      font-weight: 400;
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      color: #e0e0e0;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 36px;
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #0b5ed7;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .links {
+      margin-top: 40px;
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .links a {
+      color: #0d6efd;
+      text-decoration: none;
+      font-size: 0.95em;
+      transition: color 0.3s;
+    }
+
+    .links a:hover {
+      color: #ffeb3b;
+      text-decoration: underline;
+    }
+
+    
+
+   
+    @media (max-width: 500px) {
+      .btn {
+        padding: 12px 28px;
+        font-size: 0.95rem;
+      }
+      .logo {
+        width: 160px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <img src="{{ url_for('static', filename='by_Anitec.png') }}" alt="AutoSRT Logo" class="logo">
+  <h2>Tradução Automática de Legendas .srt – Versão Web</h2>
+
+  <a class="btn" href="{{ url_for('index') }}">▶ Começar</a>
+
+  <div class="links">
+    <a href="#" onclick="alert('Sistema de tradução de legendas para múltiplos idiomas, otimizado para performance e simplicidade.')">❓ O que é</a>
+    <a href="#" onclick="alert('1. Clique em ESCOLHER ARQUIVO\n2. Clique em TRADUZIR\n3. Aguarde a conclusão.\nO arquivo será sobrescrito com o novo texto.')">📘 Ajuda</a>
+    <a href="#" onclick="alert('Desenvolvido por Anitec | AutoSRT 2025')">📜 Sobre</a>
+  </div>
+
+
+</body>
+</html>
