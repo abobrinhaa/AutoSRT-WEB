@@ -48,7 +48,7 @@ def clean_text(text):
     text = emoji_pattern.sub(r'', text)
     return text.replace("\ufeff", "").replace("\u200b", "").strip()
 
-def format_line(line, width=42):
+def format_line(line, width=LINE_WIDTH):
     return "\n".join(textwrap.wrap(line, width=width))
 
 def detect_language(input_path):
