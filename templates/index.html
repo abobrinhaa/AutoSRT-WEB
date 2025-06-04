@@ -89,7 +89,7 @@
 <body>
   <div class="container">
     <img src="{{ url_for('static', filename='by_Anitec_Copia.png') }}" alt="AutoSRT Logo" class="logo">
-    <form method="POST" action="/tradutor" enctype="multipart/form-data" onsubmit="startProgress()">
+    <form method="POST" action="/tradutor" enctype="multipart/form-data">
       <input type="file" name="srt_file" required>
       <button type="submit">Traduzir</button>
     </form>
