@@ -9,7 +9,7 @@ from deep_translator import GoogleTranslator
 from langdetect import detect
 
 app = Flask(__name__)
-app.secret_key = 'sua-chave-secreta'
+app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
 
 LINE_WIDTH = 42
 
@@ -24,6 +24,8 @@ LANG_NAME = {
     "sr": "Sérvio", "sk": "Eslovaco", "sl": "Esloveno", "lt": "Lituano",
     "mt": "Maltês", "sq": "Albanês", "is": "Islandês", "ga": "Irlandês",
 }
+
+CURRENT_PROGRESS = 0
 
 def detect_encoding(file_path):
     with open(file_path, "rb") as f:
@@ -56,14 +58,14 @@ def detect_language(input_path):
     subs = pysrt.open(input_path, encoding="utf-8")
     return detect(" ".join([sub.text for sub in subs[:10]]))
 
-def translate_srt(input_path):
+def translate_srt(input_path, target_lang="pt", progress_callback=None):
     convert_to_utf8_if_needed(input_path)
     subs = pysrt.open(input_path, encoding="utf-8")
     total = len(subs)
     lang_code = detect_language(input_path)
     lang_name = LANG_NAME.get(lang_code, lang_code.upper())
     batch_size = 300
-    translator = GoogleTranslator(source=lang_code, target="pt")
+    translator = GoogleTranslator(source=lang_code, target=target_lang)
 
     for i in range(0, total, batch_size):
         batch = subs[i:i + batch_size]
@@ -75,9 +77,11 @@ def translate_srt(input_path):
             translated = texts
         for j, sub in enumerate(batch):
             sub.text = format_line(translated[j]) if j < len(translated) else format_line(sub.text)
-
-    output_path = tempfile.mktemp(suffix=".srt")
-    subs.save(output_path, encoding="utf-8")
+        if progress_callback:
+            progress_callback(min(i + batch_size, total), total)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".srt") as out_tmp:
+        subs.save(out_tmp.name, encoding="utf-8")
+        output_path = out_tmp.name
     return output_path, lang_name, total
 
 @app.route("/")
@@ -95,15 +99,26 @@ def index():
             flash("Nenhum arquivo enviado")
             return redirect(request.url)
         file = request.files["srt_file"]
+        target_lang = request.form.get("target_lang", "pt")
         if file.filename == "":
             flash("Nenhum arquivo selecionado")
             return redirect(request.url)
+        global CURRENT_PROGRESS
+        CURRENT_PROGRESS = 0
+        def progress_cb(done, total):
+            global CURRENT_PROGRESS
+            CURRENT_PROGRESS = int(done / total * 100)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".srt") as tmp:
             file.save(tmp.name)
-            output_path, lang, total = translate_srt(tmp.name)
-            flash(f"Arquivo traduzido com sucesso: {total} linhas ({lang} → PT)")
+            output_path, lang, total = translate_srt(tmp.name, target_lang, progress_cb)
+            CURRENT_PROGRESS = 100
+            flash(f"Arquivo traduzido com sucesso: {total} linhas ({lang} → {target_lang.upper()})")
             return send_file(output_path, as_attachment=True, download_name=file.filename)
-    return render_template("index.html")
+    return render_template("index.html", languages=LANG_NAME)
+
+@app.route("/progress")
+def progress():
+    return {"progress": CURRENT_PROGRESS}
 
 @app.route('/favicon.ico')
 def favicon():
