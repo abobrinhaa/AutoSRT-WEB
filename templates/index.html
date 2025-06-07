@@ -41,6 +41,17 @@
       font-size: medium;
     }
 
+    select {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 12px;
+      background-color: #333;
+      color: #fff;
+      border: 2px solid #444;
+      border-radius: 6px;
+      font-size: medium;
+    }
+
     button {
       padding: 16px 48px;
       background-color: #0d6efd;
@@ -91,6 +102,11 @@
     <img src="{{ url_for('static', filename='by_Anitec_Copia.png') }}" alt="AutoSRT Logo" class="logo">
     <form method="POST" action="/tradutor" enctype="multipart/form-data">
       <input type="file" name="srt_file" required>
+      <select name="target_lang" style="margin-bottom:20px;padding:12px;border-radius:6px;">
+        {% for code, name in languages.items() %}
+          <option value="{{ code }}" {% if code == 'pt' %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
       <button type="submit">Traduzir</button>
     </form>
 
@@ -118,18 +134,30 @@
       const bar = document.getElementById('progressBar');
       const fill = document.getElementById('progressFill');
       const msg = document.getElementById('statusMessage');
+      const form = document.querySelector('form');
 
       bar.style.display = 'block';
       fill.style.width = '0%';
       msg.style.display = 'none';
 
-      let progress = 0;
       progressInterval = setInterval(() => {
-        if (progress < 95) {
-          progress += Math.random() * 3;
-          fill.style.width = progress + "%";
-        }
-      }, 200);
+        fetch('/progress')
+          .then(r => r.json())
+          .then(data => {
+            fill.style.width = data.progress + '%';
+            if (data.progress >= 100) {
+              clearInterval(progressInterval);
+              setTimeout(() => {
+                bar.style.display = 'none';
+                fill.style.width = '0%';
+                form.reset();
+                msg.innerText = '✅ Tradução concluída com sucesso!';
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.display = 'none'; }, 8000);
+              }, 500);
+            }
+          });
+      }, 1000);
     }
 
     window.onload = function () {
@@ -138,24 +166,6 @@
 
       form.addEventListener("submit", function () {
         startProgress();
-
-        setTimeout(() => {
-          clearInterval(progressInterval);
-          document.getElementById("progressFill").style.width = "100%";
-
-          setTimeout(() => {
-            document.getElementById("progressBar").style.display = "none";
-            document.getElementById("progressFill").style.width = "0%";
-            form.reset();
-
-            msg.innerText = "✅ Tradução concluída com sucesso!";
-            msg.style.display = "block";
-
-            setTimeout(() => {
-              msg.style.display = "none";
-            }, 8000);
-          }, 1500);
-        }, 6000);
       });
     };
   </script>
